@@ -177,7 +177,7 @@ GAFObject* GAFObject::_instantiateObject(uint32_t id, GAFCharacterType type, uin
                 result = new GAFMovieClip();
             else
                 result = new GAFMask();
-            result->initWithSpriteFrame(spriteFrame, txElemet->rotation);
+            result->initWithSpriteFrame(spriteFrame, txElemet->rotation, txElemet->scale9GridRect);
             result->objectIdRef = id;
             cocos2d::Vec2 pt = cocos2d::Vec2(0 - (0 - (txElemet->pivotPoint.x / result->getContentSize().width)),
                 0 + (1 - (txElemet->pivotPoint.y / result->getContentSize().height)));

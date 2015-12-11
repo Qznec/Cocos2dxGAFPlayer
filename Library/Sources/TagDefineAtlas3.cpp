@@ -76,6 +76,7 @@ void TagDefineAtlas3::read(GAFStream* in, GAFAsset* asset, GAFTimeline* timeline
         {
             cocos2d::Rect scale9GridRect;
             PrimitiveDeserializer::deserialize(in, &scale9GridRect);
+			element->scale9GridRect = scale9GridRect;
         }
 
         float scaleX = in->readFloat();

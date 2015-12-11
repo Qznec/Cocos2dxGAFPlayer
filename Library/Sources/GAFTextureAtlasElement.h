@@ -16,6 +16,8 @@ public:
 
     GAFRotation        rotation;
 
+	cocos2d::Rect      scale9GridRect;
+
     GAFTextureAtlasElement();  
 
     void setScale(float s);

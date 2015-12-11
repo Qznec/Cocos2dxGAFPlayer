@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cocos2d.h"
 #include "GAFQuadCommand.h"
 #include "GAFCollections.h"
 
@@ -18,6 +19,16 @@ typedef struct _gafBlendFuncSeparate
 
 } gafBlendFuncSeparate;
 
+class Scale9PolygonInfo : public cocos2d::PolygonInfo
+{
+public:
+	template<typename InputIterator>
+	typename std::enable_if<std::is_convertible<typename std::iterator_traits<InputIterator>::value_type, cocos2d::V3F_C4B_T2F_Quad*>::value>::type
+	setQuads(InputIterator first, InputIterator last);
+private:
+	void releaseVertsAndIndices();
+};
+
 /// @class GAFSprite 
 ///	This is utility class used by GAF playback. Base class for all sprites
 /// used by GAF.
@@ -26,10 +37,13 @@ class GAFSprite : public cocos2d::Sprite
 {
 public:
     GAFSprite();
+	virtual ~GAFSprite();
 
-    bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation);
+    virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation);
+	virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation, const cocos2d::Rect& capInsets);
     virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame) override;
     virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated) override;
+    virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated, const cocos2d::Rect& capInsets);
     void setTexture(cocos2d::Texture2D *texture) override;
 
     virtual void setVertexRect(const cocos2d::Rect& rect) override;
@@ -81,31 +95,49 @@ protected:
     */
     virtual void customDraw(cocos2d::Mat4& transform);
 
+	void updateSlicedQuads(const cocos2d::Mat4 &transform);
 
+private:
+	typedef std::vector<cocos2d::V3F_C4B_T2F_Quad> Scale9Slices_t;
+
+	void updateScale9GridQuads();
     /* Members */
 public:
-    uint32_t objectIdRef;
+    uint32_t                  objectIdRef;
 protected:
-    cocos2d::AffineTransform    m_externalTransform;
-    cocos2d::CustomCommand      m_customCommand;
-    GAFQuadCommand              m_quadCommand;
-private:
+    cocos2d::
+		AffineTransform       m_externalTransform;
+    cocos2d::CustomCommand    m_customCommand;
+    GAFQuadCommand            m_quadCommand;
 
+private:
     /**
     * Quad is equal to _quad but transformed to view space
     */
-    cocos2d::
-        V3F_C4B_T2F_Quad    m_quad;
+	cocos2d::V3F_C4B_T2F_Quad m_quad;
 
-    float                   m_atlasScale;
-    bool                    m_isLocator;
+	// Scale9Grid -------------------------------------------------------------------------------------
+	Scale9Slices_t            m_scale9Slices; // holds the 9 quads (tl, tc, tr, cl, c, cr, bl, bc, br);
+
+	bool                      m_scale9Enabled;
+	cocos2d::Rect             m_capInsets;
+
+	cocos2d::Size             m_topLeftSize;
+	cocos2d::Size             m_centerSize;
+	cocos2d::Size             m_bottomRightSize;
+	cocos2d::Vec2             m_centerOffset;
+
+	//-------------------------------------------------------------------------------------------------
+
+    float                     m_atlasScale;
+    bool                      m_isLocator;
 
     /* Never used */
-    gafBlendFuncSeparate    m_blendFuncSeparate;
-    bool                    m_useSeparateBlendFunc;
-    GLint                   m_blendEquation;
+    gafBlendFuncSeparate      m_blendFuncSeparate;
+    bool                      m_useSeparateBlendFunc;
+    GLint                     m_blendEquation;
 
-    GAFRotation             m_rotation;
+    GAFRotation               m_rotation;
 };
 
 NS_GAF_END
