@@ -19,16 +19,6 @@ typedef struct _gafBlendFuncSeparate
 
 } gafBlendFuncSeparate;
 
-class Scale9PolygonInfo : public cocos2d::PolygonInfo
-{
-public:
-	template<typename InputIterator>
-	typename std::enable_if<std::is_convertible<typename std::iterator_traits<InputIterator>::value_type, cocos2d::V3F_C4B_T2F_Quad*>::value>::type
-	setQuads(InputIterator first, InputIterator last);
-private:
-	void releaseVertsAndIndices();
-};
-
 /// @class GAFSprite 
 ///	This is utility class used by GAF playback. Base class for all sprites
 /// used by GAF.
@@ -125,7 +115,6 @@ private:
 	cocos2d::Size             m_topLeftSize;
 	cocos2d::Size             m_centerSize;
 	cocos2d::Size             m_bottomRightSize;
-	cocos2d::Vec2             m_centerOffset;
 
 	//-------------------------------------------------------------------------------------------------
 

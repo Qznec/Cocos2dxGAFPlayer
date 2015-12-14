@@ -15,33 +15,6 @@ USING_NS_CC;
 
 NS_GAF_BEGIN
 
-static unsigned short scale9quadIndices[] = { 0,1,2, 3,2,1, 4,5,6, 7,6,5, 8,9,10, 11,10,9, 12,13,14, 15,14,13 };
-static V3F_C4B_T2F_Quad helperQuads[9] = {};
-
-static Rect intersectRect(const Rect &first, const Rect &second)
-{
-	Rect ret;
-	ret.origin.x = std::max(first.origin.x, second.origin.x);
-	ret.origin.y = std::max(first.origin.y, second.origin.y);
-
-	float rightRealPoint = std::min(first.origin.x + first.size.width,
-		second.origin.x + second.size.width);
-	float bottomRealPoint = std::min(first.origin.y + first.size.height,
-		second.origin.y + second.size.height);
-
-	ret.size.width = std::max(rightRealPoint - ret.origin.x, 0.0f);
-	ret.size.height = std::max(bottomRealPoint - ret.origin.y, 0.0f);
-	return ret;
-}
-
-static void updateQuadCoords(V3F_C4B_T2F_Quad &quad, const Rect &rect)
-{
-	quad.tl.vertices.set(rect.origin.x, rect.origin.y, 0.f);
-	quad.tr.vertices.set(rect.origin.x + rect.size.width, rect.origin.y, 0.f);
-	quad.bl.vertices.set(rect.origin.x, rect.origin.y + rect.size.height, 0.f);
-	quad.br.vertices.set(rect.origin.x + rect.size.width, rect.origin.y + rect.size.height, 0.f);
-}
-
 static void setQuadUVs(V3F_C4B_T2F_Quad &quad, const Rect &rect,
 	const GAFRotation rotation = GAFRotation::NONE,
 	bool flippedX = false, bool flippedY = false)
@@ -113,49 +86,6 @@ static void setQuadUVs(V3F_C4B_T2F_Quad &quad, const Rect &rect,
 	}
 }
 
-template<typename InputIterator>
-typename std::enable_if<std::is_convertible<typename std::iterator_traits<InputIterator>::value_type, cocos2d::V3F_C4B_T2F_Quad*>::value, void>::type
-Scale9PolygonInfo::setQuads(InputIterator first, InputIterator last)
-{
-	releaseVertsAndIndices();
-	isVertsOwner = true;
-
-	typename std::iterator_traits<InputIterator>::difference_type n = std::distance(first, last);
-	size_t vertCount = n * 4;
-	size_t indexCount = n * 6;
-
-	triangles.verts = new V3F_C4B_T2F[vertCount];
-	triangles.indices = new unsigned short[indexCount];
-	triangles.vertCount = vertCount;
-	triangles.indexCount = indexCount;
-
-	const size_t quadVertCount = 4;
-
-	for (auto i = 0; first != last; ++i, ++first)
-	{
-		V3F_C4B_T2F* verts = reinterpret_cast<V3F_C4B_T2F*>(*first);
-		memcpy(triangles.verts + (i * quadVertCount), verts, quadVertCount * sizeof(V3F_C4B_T2F));
-	}
-
-	memcpy(triangles.indices, scale9quadIndices, indexCount * sizeof(scale9quadIndices[0]));
-}
-
-void Scale9PolygonInfo::releaseVertsAndIndices()
-{
-	if (isVertsOwner)
-	{
-		if (nullptr != triangles.verts)
-		{
-			CC_SAFE_DELETE_ARRAY(triangles.verts);
-		}
-
-		if (nullptr != triangles.indices)
-		{
-			CC_SAFE_DELETE_ARRAY(triangles.indices);
-		}
-	}
-}
-
 GAFSprite::GAFSprite()
 : objectIdRef(IDNONE)
 , m_externalTransform(AffineTransform::IDENTITY)
@@ -181,18 +111,8 @@ GAFSprite::~GAFSprite()
 
 void GAFSprite::updateScale9GridQuads()
 {
-	V3F_C4B_T2F_Quad &tlq = m_scale9Slices[0];
-	V3F_C4B_T2F_Quad &tcq = m_scale9Slices[1];
-	V3F_C4B_T2F_Quad &trq = m_scale9Slices[2];
-	V3F_C4B_T2F_Quad &clq = m_scale9Slices[3];
-	V3F_C4B_T2F_Quad &ccq = m_scale9Slices[4];
-	V3F_C4B_T2F_Quad &crq = m_scale9Slices[5];
-	V3F_C4B_T2F_Quad &blq = m_scale9Slices[6];
-	V3F_C4B_T2F_Quad &bcq = m_scale9Slices[7];
-	V3F_C4B_T2F_Quad &brq = m_scale9Slices[8];
-
-	float width = _rect.size.width;
-	float height = _rect.size.height;
+	auto width = _rect.size.width;
+	auto height = _rect.size.height;
 
 	// If there is no specified center region
 	if (m_capInsets.equals(Rect::ZERO))
@@ -201,168 +121,14 @@ void GAFSprite::updateScale9GridQuads()
 		m_capInsets = Rect(width / 3, height / 3, width / 3, height / 3);
 	}
 
-	Rect originalRect = _rect;
+	m_topLeftSize.width = m_capInsets.origin.x;
+	m_topLeftSize.height = m_capInsets.origin.y;
 
-	float leftWidth = m_capInsets.origin.x;
-	float centerWidth = m_capInsets.size.width;
-	float rightWidth = originalRect.size.width - (leftWidth + centerWidth);
+	m_centerSize.width = m_capInsets.size.width;
+	m_centerSize.height = m_capInsets.size.height;
 
-	float topHeight = m_capInsets.origin.y;
-	float centerHeight = m_capInsets.size.height;
-	float bottomHeight = originalRect.size.height - (topHeight + centerHeight);
-
-	// calculate rects
-
-	// ... top row
-	float x = 0.0;
-	float y = 0.0;
-
-	// top left
-	Rect leftTopBoundsOriginal = Rect(x, y, leftWidth, topHeight);
-	Rect leftTopBounds = leftTopBoundsOriginal;
-
-	// top center
-	x += leftWidth;
-	Rect centerTopBounds = Rect(x, y, centerWidth, topHeight);
-
-	// top right
-	x += centerWidth;
-	Rect rightTopBounds = Rect(x, y, rightWidth, topHeight);
-
-	// ... center row
-	x = 0.0;
-	y = 0.0;
-	y += topHeight;
-
-	// center left
-	Rect leftCenterBounds = Rect(x, y, leftWidth, centerHeight);
-
-	// center center
-	x += leftWidth;
-	Rect centerBoundsOriginal = Rect(x, y, centerWidth, centerHeight);
-	Rect centerBounds = centerBoundsOriginal;
-
-	// center right
-	x += centerWidth;
-	Rect rightCenterBounds = Rect(x, y, rightWidth, centerHeight);
-
-	// ... bottom row
-	x = 0.0;
-	y = 0.0;
-	y += topHeight;
-	y += centerHeight;
-
-	// bottom left
-	Rect leftBottomBounds = Rect(x, y, leftWidth, bottomHeight);
-
-	// bottom center
-	x += leftWidth;
-	Rect centerBottomBounds = Rect(x, y, centerWidth, bottomHeight);
-
-	// bottom right
-	x += centerWidth;
-	Rect rightBottomBoundsOriginal = Rect(x, y, rightWidth, bottomHeight);
-	Rect rightBottomBounds = rightBottomBoundsOriginal;
-
-	if ((m_capInsets.origin.x + m_capInsets.size.width) <= width
-		|| (m_capInsets.origin.y + m_capInsets.size.height) <= width)
-		//in general case it is error but for legacy support we will check it
-	{
-		leftTopBounds = intersectRect(leftTopBounds, originalRect);
-		centerTopBounds = intersectRect(centerTopBounds, originalRect);
-		rightTopBounds = intersectRect(rightTopBounds, originalRect);
-		leftCenterBounds = intersectRect(leftCenterBounds, originalRect);
-		centerBounds = intersectRect(centerBounds, originalRect);
-		rightCenterBounds = intersectRect(rightCenterBounds, originalRect);
-		leftBottomBounds = intersectRect(leftBottomBounds, originalRect);
-		centerBottomBounds = intersectRect(centerBottomBounds, originalRect);
-		rightBottomBounds = intersectRect(rightBottomBounds, originalRect);
-	}
-	else
-		//it is error but for legacy turn off clip system
-		CCLOG("Scale9Sprite capInsetsInternal > originalSize");
-
-	AffineTransform t = AffineTransform::IDENTITY;
-	t = AffineTransformTranslate(t, originalRect.origin.x, originalRect.origin.y);
-
-	leftTopBoundsOriginal = RectApplyAffineTransform(leftTopBoundsOriginal, t);
-	centerBoundsOriginal = RectApplyAffineTransform(centerBoundsOriginal, t);
-	rightBottomBoundsOriginal = RectApplyAffineTransform(rightBottomBoundsOriginal, t);
-
-	centerBounds = RectApplyAffineTransform(centerBounds, t);
-	rightBottomBounds = RectApplyAffineTransform(rightBottomBounds, t);
-	leftBottomBounds = RectApplyAffineTransform(leftBottomBounds, t);
-	rightTopBounds = RectApplyAffineTransform(rightTopBounds, t);
-	leftTopBounds = RectApplyAffineTransform(leftTopBounds, t);
-	rightCenterBounds = RectApplyAffineTransform(rightCenterBounds, t);
-	leftCenterBounds = RectApplyAffineTransform(leftCenterBounds, t);
-	centerBottomBounds = RectApplyAffineTransform(centerBottomBounds, t);
-	centerTopBounds = RectApplyAffineTransform(centerTopBounds, t);
-
-	m_topLeftSize = leftTopBoundsOriginal.size;
-	m_centerSize = centerBoundsOriginal.size;
-	m_bottomRightSize = rightBottomBoundsOriginal.size;
-
-	float offsetX = (centerBounds.origin.x + centerBounds.size.width / 2)
-		- (centerBoundsOriginal.origin.x + centerBoundsOriginal.size.width / 2);
-	float offsetY = (centerBoundsOriginal.origin.y + centerBoundsOriginal.size.height / 2)
-		- (centerBounds.origin.y + centerBounds.size.height / 2);
-	m_centerOffset.x = offsetX;
-	m_centerOffset.y = offsetY;
-
-	// Centre
-	if (centerBounds.size.width > 0 && centerBounds.size.height > 0)
-	{
-		updateQuadCoords(ccq, centerBounds);
-	}
-
-	// Top
-	if (centerTopBounds.size.width > 0 && centerTopBounds.size.height > 0)
-	{
-		updateQuadCoords(tcq, centerTopBounds);
-	}
-
-	// Bottom
-	if (centerBottomBounds.size.width > 0 && centerBottomBounds.size.height > 0)
-	{
-		updateQuadCoords(bcq, centerBottomBounds);
-	}
-
-	// Left
-	if (leftCenterBounds.size.width > 0 && leftCenterBounds.size.height > 0)
-	{
-		updateQuadCoords(clq, leftCenterBounds);
-	}
-
-	// Right
-	if (rightCenterBounds.size.width > 0 && rightCenterBounds.size.height > 0)
-	{
-		updateQuadCoords(crq, rightCenterBounds);
-	}
-
-	// Top left
-	if (leftTopBounds.size.width > 0 && leftTopBounds.size.height > 0)
-	{
-		updateQuadCoords(tlq, leftTopBounds);
-	}
-
-	// Top right
-	if (rightTopBounds.size.width > 0 && rightTopBounds.size.height > 0)
-	{
-		updateQuadCoords(trq, rightTopBounds);
-	}
-
-	// Bottom left
-	if (leftBottomBounds.size.width > 0 && leftBottomBounds.size.height > 0)
-	{
-		updateQuadCoords(blq, leftBottomBounds);
-	}
-
-	// Bottom right
-	if (rightBottomBounds.size.width > 0 && rightBottomBounds.size.height > 0)
-	{
-		updateQuadCoords(brq, rightBottomBounds);
-	}
+	m_bottomRightSize.width = _rect.size.width - (m_topLeftSize.width + m_centerSize.width);
+	m_bottomRightSize.height = _rect.size.height - (m_topLeftSize.width + m_centerSize.height);
 }
 
 bool GAFSprite::initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation)
@@ -462,13 +228,11 @@ void GAFSprite::setTextureCoords(cocos2d::Rect rect)
     rect = CC_RECT_POINTS_TO_PIXELS(rect);
 
     cocos2d::Texture2D *tex = _batchNode ? _textureAtlas->getTexture() : _texture;
-    if (!tex)
-    {
-        return;
-    }
 
-    float atlasWidth = tex->getPixelsWide();
-    float atlasHeight = tex->getPixelsHigh();
+    if (!tex) return;
+
+	auto atlasWidth = static_cast<float>(tex->getPixelsWide());
+	auto atlasHeight = static_cast<float>(tex->getPixelsHigh());
 
 	rect.origin.x /= atlasWidth;
 	rect.origin.y /= atlasHeight;
@@ -498,18 +262,18 @@ void GAFSprite::setTextureCoords(cocos2d::Rect rect)
 
 		Rect originalRect = _rect;
 
-		float leftWidthRatio = m_capInsets.origin.x / originalRect.size.width;
-		float centerWidthRatio = m_capInsets.size.width / originalRect.size.width;
-		float rightWidthRatio = 1 - (leftWidthRatio + centerWidthRatio);
+		auto leftWidthRatio = m_capInsets.origin.x / originalRect.size.width;
+		auto centerWidthRatio = m_capInsets.size.width / originalRect.size.width;
+		auto rightWidthRatio = 1 - (leftWidthRatio + centerWidthRatio);
 
-		float topHeightRatio = m_capInsets.origin.y / originalRect.size.height;
-		float centerHeightRatio = m_capInsets.size.height / originalRect.size.height;
-		float bottomHeightRatio = 1 - (topHeightRatio + centerHeightRatio);
+		auto topHeightRatio = m_capInsets.origin.y / originalRect.size.height;
+		auto centerHeightRatio = m_capInsets.size.height / originalRect.size.height;
+		auto bottomHeightRatio = 1 - (topHeightRatio + centerHeightRatio);
 
-		float uRangeW = tr.u - tl.u;
-		float vRangeW = tr.v - tl.v;
-		float uRangeH = bl.u - tl.u;
-		float vRangeH = bl.v - tl.v;
+		auto uRangeW = tr.u - tl.u;
+		auto vRangeW = tr.v - tl.v;
+		auto uRangeH = bl.u - tl.u;
+		auto vRangeH = bl.v - tl.v;
 
 		Tex2F tlc = { tl.u + uRangeW * leftWidthRatio, tl.v + vRangeW * leftWidthRatio };
 		Tex2F trc = { tr.u - uRangeW * rightWidthRatio, tr.v - vRangeW * rightWidthRatio };
