@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cocos2d.h"
 #include "GAFQuadCommand.h"
 #include "GAFCollections.h"
 
@@ -27,10 +26,10 @@ class GAFSprite : public cocos2d::Sprite
 {
 public:
     GAFSprite();
-	virtual ~GAFSprite();
+    virtual ~GAFSprite();
 
     virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation);
-	virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation, const cocos2d::Rect& capInsets);
+    virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame, GAFRotation rotation, const cocos2d::Rect& capInsets);
     virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame) override;
     virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated) override;
     virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated, const cocos2d::Rect& capInsets);
@@ -85,18 +84,18 @@ protected:
     */
     virtual void customDraw(cocos2d::Mat4& transform);
 
-	void updateSlicedQuads(const cocos2d::Mat4 &transform);
+    void updateSlicedQuads(const cocos2d::Mat4 &transform);
 
 private:
-	typedef std::vector<cocos2d::V3F_C4B_T2F_Quad> Scale9Slices_t;
+    typedef std::vector<cocos2d::V3F_C4B_T2F_Quad> Scale9Slices_t;
 
-	void updateScale9GridQuads();
+    void updateScale9GridQuads();
     /* Members */
 public:
     uint32_t                  objectIdRef;
 protected:
     cocos2d::
-		AffineTransform       m_externalTransform;
+        AffineTransform       m_externalTransform;
     cocos2d::CustomCommand    m_customCommand;
     GAFQuadCommand            m_quadCommand;
 
@@ -104,19 +103,19 @@ private:
     /**
     * Quad is equal to _quad but transformed to view space
     */
-	cocos2d::V3F_C4B_T2F_Quad m_quad;
+    cocos2d::V3F_C4B_T2F_Quad m_quad;
 
-	// Scale9Grid -------------------------------------------------------------------------------------
-	Scale9Slices_t            m_scale9Slices; // holds the 9 quads (tl, tc, tr, cl, c, cr, bl, bc, br);
+    // Scale9Grid -------------------------------------------------------------------------------------
+    Scale9Slices_t            m_scale9Slices; // holds the 9 quads (tl, tc, tr, cl, c, cr, bl, bc, br);
 
-	bool                      m_scale9Enabled;
-	cocos2d::Rect             m_capInsets;
+    bool                      m_scale9Enabled;
+    cocos2d::Rect             m_capInsets;
 
-	cocos2d::Size             m_topLeftSize;
-	cocos2d::Size             m_centerSize;
-	cocos2d::Size             m_bottomRightSize;
+    cocos2d::Size             m_topLeftSize;
+    cocos2d::Size             m_centerSize;
+    cocos2d::Size             m_bottomRightSize;
 
-	//-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     float                     m_atlasScale;
     bool                      m_isLocator;
