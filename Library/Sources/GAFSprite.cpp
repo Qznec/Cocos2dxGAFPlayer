@@ -270,34 +270,132 @@ void GAFSprite::setTextureCoords(cocos2d::Rect rect)
 		auto centerHeightRatio = m_capInsets.size.height / originalRect.size.height;
 		auto bottomHeightRatio = 1 - (topHeightRatio + centerHeightRatio);
 
-		auto uRangeW = tr.u - tl.u;
-		auto vRangeW = tr.v - tl.v;
-		auto uRangeH = bl.u - tl.u;
-		auto vRangeH = bl.v - tl.v;
+		Vec2 quadBaseUVVec = { tl.u, tl.v };
 
-		Tex2F tlc = { tl.u + uRangeW * leftWidthRatio, tl.v + vRangeW * leftWidthRatio };
-		Tex2F trc = { tr.u - uRangeW * rightWidthRatio, tr.v - vRangeW * rightWidthRatio };
-		Tex2F ltc = { tl.u + uRangeH * topHeightRatio, tl.v + vRangeH * topHeightRatio };
-		Tex2F lbc = { bl.u - uRangeH * bottomHeightRatio, bl.v - vRangeH * bottomHeightRatio };
+		Vec2 quadWidthUVVec = { tr.u - tl.u, tr.v - tl.v };
+		Vec2 quadHeightUVVec = { bl.u - tl.u, bl.v - tl.v };
 
+		Vec2 leftUVVec = quadWidthUVVec; leftUVVec.scale(leftWidthRatio);
+		Vec2 leftCenterUVVec = quadWidthUVVec; leftCenterUVVec.scale(centerWidthRatio);
+		Vec2 rightUVVec = quadWidthUVVec; rightUVVec.scale(rightWidthRatio);
+
+		Vec2 topUVVec = quadHeightUVVec; topUVVec.scale(topHeightRatio);
+		Vec2 topCenterUVVec = quadHeightUVVec; topCenterUVVec.scale(centerHeightRatio);
+		Vec2 bottomUVVec = quadHeightUVVec; bottomUVVec.scale(bottomHeightRatio);
+
+		Vec2 temp = quadBaseUVVec;
+
+		// 1 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
 		tlq.tl.texCoords = tl;
-		tlq.tr.texCoords = tcq.tl.texCoords = tlc;
-		tcq.tr.texCoords = trq.tl.texCoords = trc;
+
+		// 0 1 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		temp.add(leftUVVec);
+		tlq.tr.texCoords = tcq.tl.texCoords = { temp.x, temp.y };
+
+		// 0 0 1 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		temp.add(leftCenterUVVec);
+		tcq.tr.texCoords = trq.tl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 1
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
 		trq.tr.texCoords = tr;
 
-		tlq.bl.texCoords = clq.tl.texCoords = ltc;
-		tlq.br.texCoords = tcq.bl.texCoords = clq.tr.texCoords = ccq.tl.texCoords = { tlc.u, ltc.v };
-		tcq.br.texCoords = trq.bl.texCoords = ccq.tr.texCoords = crq.tl.texCoords = { trc.u, ltc.v };
-		trq.br.texCoords = crq.tr.texCoords = { tr.u, ltc.v };
+		// 0 0 0 0
+		// 1 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		temp = quadBaseUVVec;
+		temp.add(topUVVec);
+		tlq.bl.texCoords = clq.tl.texCoords = { temp.x, temp.y };
 
-		clq.bl.texCoords = blq.tl.texCoords = lbc;
-		clq.br.texCoords = ccq.bl.texCoords = blq.tr.texCoords = bcq.tl.texCoords = { tlc.u, lbc.v };
-		ccq.br.texCoords = crq.bl.texCoords = bcq.tr.texCoords = brq.tl.texCoords = { trc.u, lbc.v };
-		crq.br.texCoords = brq.tr.texCoords = { tr.u, lbc.v };
+		// 0 0 0 0
+		// 0 1 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		temp.add(leftUVVec);
+		tlq.br.texCoords = tcq.bl.texCoords = clq.tr.texCoords = ccq.tl.texCoords = { temp.x, temp.y };
 
+		// 0 0 0 0
+		// 0 0 1 0
+		// 0 0 0 0
+		// 0 0 0 0
+		temp.add(leftCenterUVVec);
+		tcq.br.texCoords = trq.bl.texCoords = ccq.tr.texCoords = crq.tl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 1
+		// 0 0 0 0
+		// 0 0 0 0
+		temp.add(rightUVVec);
+		trq.br.texCoords = crq.tr.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 1 0 0 0
+		// 0 0 0 0
+		temp = quadBaseUVVec;
+		temp.add(topUVVec);
+		temp.add(topCenterUVVec);
+		clq.bl.texCoords = blq.tl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 1 0 0
+		// 0 0 0 0
+		temp.add(leftUVVec);
+		clq.br.texCoords = ccq.bl.texCoords = blq.tr.texCoords = bcq.tl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 1 0
+		// 0 0 0 0
+		temp.add(leftCenterUVVec);
+		ccq.br.texCoords = crq.bl.texCoords = bcq.tr.texCoords = brq.tl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 1
+		// 0 0 0 0
+		temp.add(rightUVVec);
+		crq.br.texCoords = brq.tr.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 1 0 0 0
+		temp = quadBaseUVVec;
+		temp.add(quadHeightUVVec);
 		blq.bl.texCoords = bl;
-		blq.br.texCoords = bcq.bl.texCoords = { tlc.u, bl.v };
-		bcq.br.texCoords = brq.bl.texCoords = { trc.u, bl.v };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 1 0 0
+		temp.add(leftUVVec);
+		blq.br.texCoords = bcq.bl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 1 0
+		temp.add(leftCenterUVVec);
+		bcq.br.texCoords = brq.bl.texCoords = { temp.x, temp.y };
+
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 0
+		// 0 0 0 1
 		brq.br.texCoords = br;
 
 		tlq.tl.colors = tlq.tr.colors = tlq.bl.colors = tlq.br.colors = Color4B::WHITE;
