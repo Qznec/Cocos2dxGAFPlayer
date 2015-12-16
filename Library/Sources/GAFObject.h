@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cocos2d.h"
 #include "GAFDelegates.h"
 #include "GAFSprite.h"
 #include "GAFCollections.h"

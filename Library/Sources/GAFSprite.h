@@ -33,7 +33,7 @@ public:
     virtual bool initWithSpriteFrame(cocos2d::SpriteFrame *spriteFrame) override;
     virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated) override;
     virtual bool initWithTexture(cocos2d::Texture2D *pTexture, const cocos2d::Rect& rect, bool rotated, const cocos2d::Rect& capInsets);
-    void setTexture(cocos2d::Texture2D *texture) override;
+    virtual void setTexture(cocos2d::Texture2D *texture) override;
 
     virtual void setVertexRect(const cocos2d::Rect& rect) override;
     virtual void setTextureRect(const cocos2d::Rect& rect, bool rotated, const cocos2d::Size& untrimmedSize) override;
