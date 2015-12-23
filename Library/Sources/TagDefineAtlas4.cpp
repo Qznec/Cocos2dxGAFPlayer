@@ -1,8 +1,6 @@
 #include "GAFPrecompiled.h"
-#include "TagDefineAtlas3.h"
+#include "TagDefineAtlas4.h"
 
-#include "GAFFile.h"
-#include "GAFHeader.h"
 #include "GAFStream.h"
 #include "GAFAsset.h"
 #include "GAFTimeline.h"
@@ -13,7 +11,7 @@
 
 NS_GAF_BEGIN
 
-void TagDefineAtlas3::read(GAFStream* in, GAFAsset* asset, GAFTimeline* timeline)
+void TagDefineAtlas4::read(GAFStream* in, GAFAsset* asset, GAFTimeline* timeline)
 {
     GAFTextureAtlas* txAtlas = new GAFTextureAtlas();
 
@@ -51,7 +49,7 @@ void TagDefineAtlas3::read(GAFStream* in, GAFAsset* asset, GAFTimeline* timeline
         PrimitiveDeserializer::deserialize(in, &element->pivotPoint);
         cocos2d::Vec2 origin;
         PrimitiveDeserializer::deserialize(in, &origin);
-        
+
         // TODO: Optimize this to read CCRect
         float width = in->readFloat();
         float height = in->readFloat();
@@ -86,7 +84,8 @@ void TagDefineAtlas3::read(GAFStream* in, GAFAsset* asset, GAFTimeline* timeline
         int8_t rotation = in->readSByte();
         element->rotation = static_cast<GAFRotation>(rotation);
         in->readString(&element->linkageName);
-        
+        in->readString(&element->baseClass);
+        in->readString(&element->originClass);
     }
 
     if (timeline)

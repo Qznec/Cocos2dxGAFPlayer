@@ -8,7 +8,7 @@ class GAFLoader;
 
 class TagDefineTimeline : public DefinitionTagBase
 {
-private:
+protected:
     GAFLoader*  m_loader; // weak
 public:
 

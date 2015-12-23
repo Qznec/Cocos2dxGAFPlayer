@@ -337,7 +337,7 @@ void GAFAsset::_chooseTextureAtlas(float desiredAtlasScale)
     }
 }
 
-GAFSprite* GAFAsset::getCustomRegion(const std::string& name)
+GAFSprite* GAFAsset::getCustomRegion(const std::string& linkageName)
 {
     GAFTextureAtlas* atlas = getTextureAtlas();
     const GAFTextureAtlas::Elements_t& elementsMap = atlas->getElements();
@@ -346,7 +346,7 @@ GAFSprite* GAFAsset::getCustomRegion(const std::string& name)
     GAFTextureAtlas::Elements_t::const_iterator elIt = std::find_if(
         elementsMap.begin(),
         elementsMap.end(),
-        [name](const std::pair<uint32_t, GAFTextureAtlasElement*>& pair) { return pair.second->name == name; }); // Search for atlas element by its xref
+        [linkageName](const std::pair<uint32_t, GAFTextureAtlasElement*>& pair) { return pair.second->linkageName == linkageName; }); // Search for atlas element by its xref
     
     assert(elIt != elementsMap.end());
     const GAFTextureAtlasElement* txElemet = nullptr;
@@ -361,7 +361,7 @@ GAFSprite* GAFAsset::getCustomRegion(const std::string& name)
         }
         else
         {
-            CCLOGERROR("Cannot add sub object with name: %s, atlas with idx: %d not found.", name.c_str(), txElemet->atlasIdx);
+            CCLOGERROR("Cannot add sub object with linkageName: %s, atlas with idx: %d not found.", linkageName.c_str(), txElemet->atlasIdx);
         }
     }
 

@@ -32,27 +32,27 @@ const cocos2d::AffineTransform GAFObject::AffineTransformFlashToCocos(const coco
 
 
 GAFObject::GAFObject()
-    : m_timelineParentObject(nullptr)
-    , m_container(nullptr)
-    , m_totalFrameCount(0)
-    , m_currentSequenceStart(0)
-    , m_currentSequenceEnd(0)
-    , m_isRunning(false)
-    , m_isLooped(false)
-    , m_isReversed(false)
-    , m_timeDelta(0.0)
-    , m_fps(0)
-    , m_skipFpsCheck(false)
-    , m_asset(nullptr)
-    , m_timeline(nullptr)
-    , m_currentFrame(GAFFirstFrameIndex)
-    , m_showingFrame(GAFFirstFrameIndex)
-    , m_lastVisibleInFrame(0)
-    , m_objectType(GAFObjectType::None)
-    , m_animationsSelectorScheduled(false)
-    , m_isInResetState(false)
-    , m_customFilter(nullptr)
-    , m_isManualColor(false)
+: m_timelineParentObject(nullptr)
+, m_container(nullptr)
+, m_totalFrameCount(0)
+, m_currentSequenceStart(0)
+, m_currentSequenceEnd(0)
+, m_isRunning(false)
+, m_isLooped(false)
+, m_isReversed(false)
+, m_timeDelta(0.0)
+, m_fps(0)
+, m_skipFpsCheck(false)
+, m_asset(nullptr)
+, m_timeline(nullptr)
+, m_currentFrame(GAFFirstFrameIndex)
+, m_showingFrame(GAFFirstFrameIndex)
+, m_lastVisibleInFrame(0)
+, m_objectType(GAFObjectType::None)
+, m_animationsSelectorScheduled(false)
+, m_isInResetState(false)
+, m_customFilter(nullptr)
+, m_isManualColor(false)
 {
     m_charType = GAFCharacterType::Timeline;
     m_parentColorTransforms[0] = cocos2d::Vec4::ONE;
@@ -708,22 +708,32 @@ static cocos2d::Rect GAFCCRectUnion(const cocos2d::Rect& src1, const cocos2d::Re
     return cocos2d::Rect(combinedLeftX, combinedBottomY, combinedRightX - combinedLeftX, combinedTopY - combinedBottomY);
 }
 
-cocos2d::Rect GAFObject::getBoundingBoxForCurrentFrame()
+cocos2d::Rect GAFObject::getInternalBoundingBoxForCurrentFrame()
 {
     cocos2d::Rect result = cocos2d::Rect::ZERO;
 
-    bool isFirstObj = true;
-    for (DisplayList_t::iterator i = m_displayList.begin(), e = m_displayList.end(); i != e; ++i)
-    {
-        if (*i == nullptr)
-        {
-            continue;
-        }
+    const AnimationFrames_t& animationFrames = m_timeline->getAnimationFrames();
 
-        GAFSprite* anim = *i;
-        if (anim->isVisible())
+    if (animationFrames.size() <= m_currentFrame)
+    {
+        return result;
+    }
+
+    GAFAnimationFrame* currentFrame = animationFrames[m_currentFrame];
+
+    const GAFAnimationFrame::SubobjectStates_t& states = currentFrame->getObjectStates();
+
+    bool isFirstObj = true;
+    for (const GAFSubobjectState* state : states)
+    {
+        GAFObject* subObject = m_displayList[state->objectIdRef];
+
+        if (!subObject)
+            continue;
+
+        if (state->isVisible())
         {
-            cocos2d::Rect bb = anim->getBoundingBox();
+            cocos2d::Rect bb = subObject->getBoundingBox();
             if (isFirstObj)
                 result = bb;
             else
@@ -733,7 +743,12 @@ cocos2d::Rect GAFObject::getBoundingBoxForCurrentFrame()
         isFirstObj = false;
     }
 
-    return cocos2d::RectApplyTransform(result, getNodeToParentTransform());
+    return result;
+}
+
+cocos2d::Rect GAFObject::getBoundingBoxForCurrentFrame()
+{
+    return cocos2d::RectApplyTransform(getInternalBoundingBoxForCurrentFrame(), getNodeToParentTransform());
 }
 
 cocos2d::Mat4 const& GAFObject::getNodeToParentTransform() const

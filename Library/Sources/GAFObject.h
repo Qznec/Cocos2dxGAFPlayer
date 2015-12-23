@@ -176,12 +176,13 @@ public:
 
     static GAFObject * create(GAFAsset * anAsset, GAFTimeline* timeline);
 
-    bool init(GAFAsset * anAnimationData, GAFTimeline* timeline);
+    virtual bool init(GAFAsset * anAnimationData, GAFTimeline* timeline);
 
     bool hasSequences() const;
 
     bool isVisibleInCurrentFrame() const;
 
+    cocos2d::Rect getInternalBoundingBoxForCurrentFrame();
     cocos2d::Rect getBoundingBoxForCurrentFrame();
 
     const AnimationSequences_t& getSequences() const;

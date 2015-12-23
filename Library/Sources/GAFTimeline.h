@@ -32,6 +32,8 @@ private:
     uint32_t                m_framesCount;
 
     std::string             m_linkageName;
+    std::string             m_baseClass;
+    std::string             m_originClass;
 
     GAFTextureAtlas*        m_currentTextureAtlas;
     GAFTextureLoadDelegate_t m_textureLoadDelegate;
@@ -60,6 +62,8 @@ public:
     void                        setSceneColor(const cocos2d::Color4B&);
 
     void                        setLinkageName(const std::string& linkageName);
+    void                        setBaseClass(const std::string& baseClass);
+    void                        setOriginClass(const std::string& originClass);
 
     const AnimationObjects_t&   getAnimationObjects() const;
     const AnimationMasks_t&     getAnimationMasks() const;
@@ -74,6 +78,8 @@ public:
     const cocos2d::Point        getPivot() const;
 
     const std::string           getLinkageName() const;
+    const std::string           getBaseClass() const;
+    const std::string           getOriginClass() const;
 
     /// get GAFAnimationSequence by name specified in editor
     const GAFAnimationSequence* getSequence(const std::string& name) const;

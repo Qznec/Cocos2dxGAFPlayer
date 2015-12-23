@@ -4,7 +4,9 @@
 NS_GAF_BEGIN
 
 GAFTextureAtlasElement::GAFTextureAtlasElement()
-: name("")
+: linkageName("")
+, baseClass("")
+, originClass("")
 , rotation(GAFRotation::NONE)
 , scale9GridRect(cocos2d::CCRect::ZERO)
 {

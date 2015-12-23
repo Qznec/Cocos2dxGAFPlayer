@@ -180,6 +180,16 @@ void GAFTimeline::setLinkageName(const std::string &linkageName)
     m_linkageName = linkageName;
 }
 
+void GAFTimeline::setBaseClass(const std::string &baseClass)
+{
+    m_baseClass = baseClass;
+}
+
+void GAFTimeline::setOriginClass(const std::string &originClass)
+{
+    m_originClass = originClass;
+}
+
 uint32_t GAFTimeline::getFramesCount() const
 {
     return m_framesCount;
@@ -198,6 +208,16 @@ const cocos2d::Point GAFTimeline::getPivot() const
 const std::string GAFTimeline::getLinkageName() const
 {
     return m_linkageName;
+}
+
+const std::string GAFTimeline::getBaseClass() const
+{
+    return m_baseClass;
+}
+
+const std::string GAFTimeline::getOriginClass() const
+{
+    return m_originClass;
 }
 
 GAFTimeline* GAFTimeline::getParent() const

@@ -28,4 +28,15 @@ void GAFTextField::initWithTextData(GAFTextData const* data)
     addChild(m_label);
 }
 
+void GAFTextField::setText(std::string text)
+{
+    m_label->setString(text);
+}
+
+cocos2d::Rect GAFTextField::getBoundingBox() const
+{
+    cocos2d::Rect rect(m_label->getBoundingBox());
+    return RectApplyAffineTransform(rect, getNodeToParentAffineTransform());
+}
+
 NS_GAF_END

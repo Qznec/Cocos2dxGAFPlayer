@@ -22,6 +22,8 @@ struct Tags
         TagDefineTimeline = 13,
         TagDefineSounds = 14,
         TagDefineAtlas3 = 15,
+        TagDefineAtlas4 = 16,
+        TagDefineTimeline2 = 17
     };
 
     static std::string toString(Enum e)
@@ -75,6 +77,12 @@ struct Tags
 
         case Tags::TagDefineAtlas3:
             return "TagDefineAtlas3";
+
+        case Tags::TagDefineAtlas4:
+            return "TagDefineAtlas4";
+
+        case Tags::TagDefineTimeline2:
+            return "TagDefineTimeline2";
 
         default:
             return "This tag is not yet implemented";

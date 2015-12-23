@@ -22,7 +22,7 @@ class GAFAsset : public cocos2d::Ref
     friend class GAFObject;
 private:
     GAFHeader               m_header;
-	Timelines_t				m_timelines;
+    Timelines_t             m_timelines;
     GAFTimeline*            m_rootTimeline;
     SoundInfos_t            m_soundInfos;
     TextureAtlases_t        m_textureAtlases; // custom regions
@@ -34,7 +34,7 @@ private:
     void loadTextures(const std::string& filePath, GAFTextureLoadDelegate_t delegate, cocos2d::ZipFile* bundle = nullptr);
     void _chooseTextureAtlas(float desiredAtlasScale);
     GAFTextureLoadDelegate_t m_textureLoadDelegate;
-	GAFAssetTextureManager*	m_textureManager;
+    GAFAssetTextureManager* m_textureManager;
 
     GAFSoundDelegate_t m_soundDelegate;
 
@@ -64,7 +64,7 @@ public:
 
     bool                        initWithGAFBundle(const std::string& zipfilePath, const std::string& entryFile, GAFTextureLoadDelegate_t delegate, GAFLoader* customLoader = nullptr);
 
-	void						pushTimeline(uint32_t timelineIdRef, GAFTimeline* t);
+    void                        pushTimeline(uint32_t timelineIdRef, GAFTimeline* t);
     void                        pushSound(uint32_t id, GAFSoundInfo* sound);
     void                        soundEvent(GAFTimelineAction *action);
 
@@ -78,7 +78,7 @@ public:
     GAFTimeline*                getRootTimeline() const;
     GAFTimeline*                getTimelineByName(const std::string& name) const;
 
-	const Timelines_t&			getTimelines() const;
+    const Timelines_t&          getTimelines() const;
     Timelines_t&                getTimelines();
 
     static GAFAsset*            createWithBundle(const std::string& zipfilePath, const std::string& entryFile, GAFTextureLoadDelegate_t delegate, GAFLoader* customLoader = nullptr);
