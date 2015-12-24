@@ -32,7 +32,7 @@ protected:
     static const char STATE_SELECTED_DOWN_STR[];
     static const char STATE_SELECTED_DISABLED_STR[];
 
-    static const char GAFButton::HIT_OBJECT_NAME[];
+    static const char HIT_OBJECT_NAME[];
 
     bool m_selected;
     bool m_checkBoxMode;
