@@ -10,8 +10,18 @@ LOCAL_MODULE := gafplayer_static
 
 LOCAL_MODULE_FILENAME := libgafplayer
 
-CLASSES_FILES := $(wildcard $(GAF_LIB_SOURCES)/*.cpp)
-LOCAL_SRC_FILES := $(CLASSES_FILES:$(LOCAL_PATH)/%=%)
+#traverse all the directory and subdirectory
+define walk
+  $(wildcard $(1)) $(foreach e, $(wildcard $(1)/*), $(call walk, $(e)))
+endef
+
+#find all the file recursively
+ALLFILES = $(call walk, $(GAF_LIB_SOURCES))
+FILE_LIST := $(filter %.cpp, $(ALLFILES))
+LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
+
+#CLASSES_FILES := $(wildcard $(GAF_LIB_SOURCES)/*.cpp)
+#LOCAL_SRC_FILES := $(CLASSES_FILES:$(LOCAL_PATH)/%=%)
 
 LOCAL_C_INCLUDES := \
 $(CCX_ROOT)/cocos \
